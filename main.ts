@@ -1,8 +1,6 @@
-/// <reference types="obsidian" />
 import {
   App,
   Editor,
-  MarkdownView,
   Notice,
   Plugin,
   PluginSettingTab,
@@ -38,28 +36,23 @@ export default class StoicQuotesPlugin extends Plugin {
     await this.loadQuotesFromFile();
 
     // ── Code block renderer ────────────────────────────────────────────────
-    // Usage in a note:
-    //   ```stoic
-    //   ```
     this.registerMarkdownCodeBlockProcessor("stoic", (_source, el) => {
       this.renderQuoteBlock(el);
     });
 
     // ── Commands ───────────────────────────────────────────────────────────
 
-    // Insert the ```stoic``` embed shortcode at cursor
     this.addCommand({
-      id: "insert-stoic-block",
-      name: "Insert stoic quote block (embed)",
+      id: "insert-quote-block",
+      name: "Insert quote block",
       editorCallback: (editor: Editor) => {
         editor.replaceSelection("```stoic\n```\n");
       },
     });
 
-    // Insert the current random quote as plain blockquote text
     this.addCommand({
-      id: "insert-stoic-quote-text",
-      name: "Insert random stoic quote as blockquote text",
+      id: "insert-quote-as-blockquote",
+      name: "Insert quote as blockquote text",
       editorCallback: (editor: Editor) => {
         const quote = this.getRandomQuote();
         if (quote) {
@@ -68,16 +61,15 @@ export default class StoicQuotesPlugin extends Plugin {
           );
         } else {
           new Notice(
-            'No quotes cached yet. Run "Fetch & cache stoic quotes" first.'
+            'No quotes cached yet. Run "Fetch and cache quotes" first.'
           );
         }
       },
     });
 
-    // Fetch + cache quotes from the API
     this.addCommand({
-      id: "fetch-stoic-quotes",
-      name: "Fetch & cache stoic quotes",
+      id: "fetch-quotes",
+      name: "Fetch and cache quotes",
       callback: async () => {
         await this.fetchAndCacheQuotes();
       },
@@ -105,7 +97,7 @@ export default class StoicQuotesPlugin extends Plugin {
       const empty = container.createDiv({ cls: "stoic-quote-empty" });
       empty.createSpan({ text: "⚡ " });
       empty.createSpan({
-        text: 'No quotes cached. Run the "Fetch & cache stoic quotes" command first.',
+        text: 'No quotes cached. Run "Fetch and cache quotes" from the command palette first.',
       });
       return;
     }
@@ -137,13 +129,12 @@ export default class StoicQuotesPlugin extends Plugin {
   }
 
   async fetchAndCacheQuotes(silent = false) {
-    if (!silent) new Notice("Fetching stoic quotes…");
+    if (!silent) new Notice("Fetching quotes…");
 
     try {
       const count = this.settings.fetchCount;
       const fetched: StoicQuote[] = [];
 
-      // stoic-quotes.com returns { text, author } — fire requests in parallel
       const requests = Array.from({ length: count }, () =>
         requestUrl({ url: "https://stoic-quotes.com/api/quote" })
           .then((r) => r.json as StoicQuote)
@@ -166,10 +157,10 @@ export default class StoicQuotesPlugin extends Plugin {
       await this.saveQuotesToFile();
 
       if (!silent) {
-        new Notice(`✅ Cached ${this.quotes.length} stoic quotes.`);
+        new Notice(`Cached ${this.quotes.length} quotes.`);
       }
     } catch {
-      new Notice("❌ Failed to fetch quotes. Check your internet connection.");
+      new Notice("Failed to fetch quotes. Check your internet connection.");
     }
   }
 
@@ -218,7 +209,6 @@ class StoicQuotesSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Stoic Quotes" });
 
     new Setting(containerEl)
       .setName("Quotes cache file")
@@ -273,7 +263,7 @@ class StoicQuotesSettingTab extends PluginSettingTab {
           })
       );
 
-    containerEl.createEl("h3", { text: "Actions" });
+    new Setting(containerEl).setName("Actions").setHeading();
 
     new Setting(containerEl)
       .setName("Fetch quotes now")
