@@ -1,0 +1,11 @@
+{
+  "id": "stoic-quotes",
+  "name": "Stoic Quotes",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Embed random Stoic quotes in your notes with a simple code block. Quotes are fetched from stoic-quotes.com and cached locally in your vault.",
+  "author": "bloodstiller",
+  "authorUrl": "https://github.com/bloodstiller",
+  "fundingUrl": "",
+  "isDesktopOnly": false
+}
